@@ -1,6 +1,32 @@
 pipeline {
     agent any
+    pipeline {
+    agent any
 
+    tools {
+        jdk 'jdk21' // This must match the name you set in Step 1
+    }
+
+    environment {
+        DOCKERHUB_CREDENTIALS = 'ClogMachine'
+        IMAGE_NAME = 'rahulnb379/new_docker_image'
+    }
+
+    stages {
+        stage('Build java application') {
+            steps {
+                // Jenkins now puts Java 21 on the PATH for you
+                bat 'javac HelloWorld.java'
+            }
+        }
+        stage('Run java program') {
+            steps {
+                bat 'java HelloWorld'
+            }
+        }
+        // ... rest of your stages
+    }
+}
     environment {
       DOCKERHUB_CREDENTIALS='ClogMachine'
       IMAGE_NAME = 'rahulnb379/new_docker_image'
