@@ -1,40 +1,54 @@
 pipeline {
-   agent any
+    agent any
 
-  environment {
-    DOCKERHUB_CREDENTIALS = 'ClogMachine'
-    IMAGE_NAME = 'rahulnb379/dockerimg'
-  }
-
-  stages {
-    stage('Build Java Application') {
-      steps {
-        bat 'javac helloWorld.java'
+    environment {
+      DOCKERHUB_CREDENTIALS='ClogMachine'
+      IMAGE_NAME = 'rahulnb379/new_docker_image'
       }
-    }
 
-    stage('Build Docker Image') {
-      step {
-        bat 'docker build -t %IMAGE_NAME%:latest .'
-      }
-    }
+    stages {
 
-    stage('Login to Dockerhub') {
-      steps{
-        withCredentials([usernamePassword(
-          credentialsId: 'ClogMachine',
-          usernameVariable: 'rahulnb379', 
-           passwordVariable: 'Rahulnb74')]) {
-
-              bat 'echo %PASS%| docker login -u %USER% --password-stdin'
+        stage('Build java application') {
+            steps {
+                bat 'javac HelloWorld.java'
+            }
         }
-      }
-    }
-
-     stage('Push Docker Image') {
-        steps {
-           bat 'docker push %IMAGE_NAME%:latest'
+      stage('Run java program') {
+            steps {
+                bat 'java HelloWorld'
+            }
         }
-     }
-  }
+
+      stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t %IMAGE_NAME%:latest .'
+            }
+        }
+   
+
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'ClogMachine',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    bat 'echo %PASS% | docker login -u %USER% --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                bat 'docker push %IMAGE_NAME%:latest'
+            }
+        }
+    }
 }
+
+
+
+
+
+
