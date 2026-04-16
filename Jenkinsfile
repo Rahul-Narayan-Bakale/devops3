@@ -1,10 +1,8 @@
 pipeline {
     agent any
-    pipeline {
-    agent any
 
     tools {
-        jdk 'jdk21' // This must match the name you set in Step 1
+        jdk 'jdk21' 
     }
 
     environment {
@@ -15,7 +13,6 @@ pipeline {
     stages {
         stage('Build java application') {
             steps {
-                // Jenkins now puts Java 21 on the PATH for you
                 bat 'javac HelloWorld.java'
             }
         }
@@ -24,57 +21,22 @@ pipeline {
                 bat 'java HelloWorld'
             }
         }
-        // ... rest of your stages
-    }
-}
-    environment {
-      DOCKERHUB_CREDENTIALS='ClogMachine'
-      IMAGE_NAME = 'rahulnb379/new_docker_image'
-      }
-
-    stages {
-
-        stage('Build java application') {
+        stage('Build Docker Image') {
             steps {
-                bat 'javac HelloWorld.java'
+                bat "docker build -t ${IMAGE_NAME}:latest ."
             }
         }
-      stage('Run java program') {
-            steps {
-                bat 'java HelloWorld'
-            }
-        }
-
-      stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t %IMAGE_NAME%:latest .'
-            }
-        }
-   
-
-
         stage('Login to DockerHub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'ClogMachine',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    bat 'echo %PASS%| docker login -u %USER% --password-stdin'
+                withCredentials([usernamePassword(credentialsId: 'ClogMachine', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    bat "echo ${PASS}| docker login -u ${USER} --password-stdin"
                 }
             }
         }
-
         stage('Push Docker Image') {
             steps {
-                bat 'docker push %IMAGE_NAME%:latest'
+                bat "docker push ${IMAGE_NAME}:latest"
             }
         }
     }
 }
-
-
-
-
-
-
